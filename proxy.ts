@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { cookies } from "next/headers";
 
 const PUBLIC_PATHS = ["/sign-in", "/sign-up"];
 const PRIVATE_PREFIXES = ["/profile", "/notes"];
@@ -9,8 +10,9 @@ export async function proxy(req: NextRequest) {
   const isPrivate = PRIVATE_PREFIXES.some((p) => pathname.startsWith(p));
 
   // authentication relies on accessToken cookie set by server routes
-  const accessToken = req.cookies.get("accessToken")?.value;
-  const refreshToken = req.cookies.get("refreshToken")?.value;
+  const cookieStore = await cookies();
+  const accessToken = cookieStore.get("accessToken")?.value;
+  const refreshToken = cookieStore.get("refreshToken")?.value;
   let authenticated = !!accessToken;
 
   // if no accessToken but refreshToken exists, try to refresh session
